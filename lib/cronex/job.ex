@@ -3,11 +3,13 @@ defmodule Cronex.Job do
   This module represents a job.
   """
 
-  import Cronex.Parser 
+  import Cronex.Parser
 
   defstruct frequency: nil,
             task: nil,
             pid: nil
+
+  @timezone Application.get_env(:cronex, :timezone, "Etc/UTC")
 
   @doc """
   Creates a `%Job{}` with a given frequency and task.
@@ -83,16 +85,16 @@ defmodule Cronex.Job do
   """
   def can_run?(%Cronex.Job{} = job) do
     # TODO Process.alive? only works for local processes, improve this to support several nodes
-    
+
     is_time(job.frequency) and # Is time to run
-    (job.pid == nil or !Process.alive?(job.pid)) # Job process is dead or non existing 
+    (job.pid == nil or !Process.alive?(job.pid)) # Job process is dead or non existing
   end
 
   defp raise_invalid_frequency_error do
     raise ArgumentError, """
     An invalid frequency was given when creating a job.
 
-    Check the docs to see the accepted frequency arguments. 
+    Check the docs to see the accepted frequency arguments.
     """
   end
 
@@ -162,7 +164,7 @@ defmodule Cronex.Job do
 
   # Every year job, check month, day and time of job
   defp is_time({minute, hour, day, month, :*}) do
-    current_date_time().minute == minute and 
+    current_date_time().minute == minute and
     current_date_time().hour == hour and
     current_date_time().day == day and
     current_date_time().month == month
@@ -171,7 +173,6 @@ defmodule Cronex.Job do
   defp is_time(_frequency), do: false
 
   defp current_date_time do
-    date_time_provider = Application.get_env(:cronex, :date_time_provider, DateTime)
-    date_time_provider.utc_now
+    Timex.now(@timezone)
   end
 end
