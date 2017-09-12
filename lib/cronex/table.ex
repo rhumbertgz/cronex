@@ -31,7 +31,7 @@ defmodule Cronex.Table do
 
   # Callback functions
   def init(args) do
-    if is_nil(args[:scheduler]), do: raise_scheduler_not_provided_error() 
+    if is_nil(args[:scheduler]), do: raise_scheduler_not_provided_error()
 
     GenServer.cast(self(), :init)
 
@@ -54,7 +54,7 @@ defmodule Cronex.Table do
   end
 
   def handle_call({:add_job, %Job{} = job}, _from, state) do
-    new_state = state |> do_add_job(job)
+    new_state = do_add_job(state, job)
     {:reply, :ok, new_state}
   end
 
@@ -68,8 +68,8 @@ defmodule Cronex.Table do
     updated_jobs =
       for {id, job} <- state[:jobs], into: %{} do
         updated_job =
-          if job |> can_run? do
-            job |> run(scheduler.job_supervisor)
+          if can_run?(job) do
+             run(job, scheduler.job_supervisor)
           else
             job
           end
@@ -93,7 +93,9 @@ defmodule Cronex.Table do
   end
 
   defp do_add_job(state, %Job{} = job) do
-    index = state[:jobs] |> Map.keys |> Enum.count 
+    index = state[:jobs]
+            |> Map.keys
+            |> Enum.count
     put_in(state, [:jobs, index], job)
   end
 
@@ -103,8 +105,8 @@ defmodule Cronex.Table do
 
   defp ping_interval do
     case Mix.env do
-      :prod -> 30000
-      :dev -> 30000
+      :prod -> 60000
+      :dev -> 60000
       :test -> 100
     end
   end
