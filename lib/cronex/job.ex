@@ -77,7 +77,7 @@ defmodule Cronex.Job do
   """
   def run(%Cronex.Job{task: task} = job, supervisor) do
     {:ok, pid} = Task.Supervisor.start_child(supervisor, task)
-    job |> Map.put(:pid, pid)
+    Map.put(job, :pid, pid)
   end
 
   @doc """
