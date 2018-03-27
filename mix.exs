@@ -27,7 +27,7 @@ defmodule Cronex.Mixfile do
   defp deps do
     [
       {:ex_doc, "~> 0.14", only: :dev},
-      {:timex,  "~> 3.1.24"},
+      {:timex,  "~> 3.2.1"},
     ]
   end
 
